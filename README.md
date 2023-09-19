@@ -1,2 +1,2 @@
 # Text-Adventure-Game
-OOP Text Adventure Game project
+A Text Adventure Game project made using concepts of OOP like Inheritance, Composition, Association, Polymorphism in Javascript
