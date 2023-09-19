@@ -1,2 +1,2 @@
 # Text-Adventure-Game
-OOP Text Adventure Game project
+OOP Text Adventure Game project in Javascript
