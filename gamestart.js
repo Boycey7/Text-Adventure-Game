@@ -7,8 +7,11 @@ class Room {
       this._items = [];
     }
 
-    set items(items) {
-        this._items = items;
+    set items(newItem) {
+      if (Array.isArray(newItem)) {
+        return;
+      }
+        this._items.push(newItem);
       }
     
       get items() {
@@ -127,7 +130,7 @@ class Room {
   console.log("online");
   
   const forest = new Room("Forest", "This is a dark and mysterious forest.");
-  const castleEntrance = new Room("Castle Entrance", "Towering Castle Stands Infront of you with towering doors.");
+  const castleEntrance = new Room("Castle Entrance", "A Great Castle Stands Infront of you with towering doors.");
   const grandHall = new Room("Grand Hall", "A vast hall with a high ceiling, chandeliers, and a red carpet.");
   const lake = new Room("Lake", "long vast lake");
   const armory = new Room("Armory", "Rows of medieval weaponry, A faint metallic scent lingers in the air.");
@@ -136,15 +139,18 @@ class Room {
   const throneRoom = new Room("Throne Room","A massive throne and crimson carpet. Stained glass windows depict dark scenes from the castle's history.");
 
 // Items in rooms
-armory.items = ["Sword"];
+armory.items = "Sword"
+castleEntrance.items = "door"
 
 
 
 // Linked Rooms
   forest.linkRoom("west", castleEntrance);
   forest.linkRoom("east", lake);
+  lake.linkRoom("west", forest);
   castleEntrance.linkRoom("north", grandHall);
   castleEntrance.linkRoom("west", armory);
+  castleEntrance.linkRoom("east", forest);
   grandHall.linkRoom("south", castleEntrance);
   grandHall.linkRoom("west", armory);
   grandHall.linkRoom("west", library);
@@ -175,13 +181,19 @@ armory.items = ["Sword"];
 
   
     let textContent = "<p>" + room.describe() + "</p>" + "<p>" + occupantMsg + "</p>";
-    textContent += "<p>Location: East of Castle</p>";   
+
+    if (room.name === "Forest") {textContent += "<p>You are East of a Castle</p>";
+  }   
     
 
     document.getElementById("textarea").innerHTML = textContent;
     document.getElementById("usertext").value = "";
     document.getElementById("usertext").focus();
   };
+
+  // make an array of empty items 
+
+  let usersCollectedItems = []
   
   const startgame = () => {
     currentRoom = forest;
@@ -191,10 +203,51 @@ armory.items = ["Sword"];
       if (event.key === "Enter") {
         const command = document.getElementById("usertext").value.toLowerCase();
         const directions = ["north", "south", "east", "west"];
+        const verbs = ["go north", "go south", "go east", "go west", "pickup", "open"];
         if (directions.includes(command)) {
           currentRoom = currentRoom.move(command);
           displayRoomInfo(currentRoom);
-        } else {
+        } else if
+        // direction based commands 
+        (verbs.includes(command)) {
+          if (command.includes("go")) {
+            const newCommand = command.split(" ");
+            currentRoom = currentRoom.move(newCommand[1]);
+            displayRoomInfo(currentRoom);
+          }
+
+          else if (command === "pickup") {
+            usersCollectedItems = [
+              ...usersCollectedItems,
+              ...currentRoom.items
+            ]
+            currentRoom.items = [];
+            usersCollectedItems = new Set(
+              usersCollectedItems
+            );
+            usersCollectedItems = Array.from(usersCollectedItems)
+            console.log(usersCollectedItems);
+          }
+
+          else if (command === "open") {
+            const doorIndex = currentRoom.items.indexOf("door");
+            if (doorIndex !== -1) {
+              usersCollectedItems.push("door");
+              currentRoom.items.splice(doorIndex, 1);
+              console.log("You opened the door.");
+              if (currentRoom.name === "Castle Entrance") {
+                currentRoom = currentRoom.move("west");
+                displayRoomInfo(currentRoom);
+                console.log("You moved to the Grand Hall.");
+              }
+            } else {
+              alert("There is no door to open.");
+            }
+          }
+        
+     
+
+        } else{
           document.getElementById("usertext").value = "";
           alert("That is not a valid command.");
           return;
