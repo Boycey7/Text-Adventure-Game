@@ -74,8 +74,8 @@ class Room {
       this._description = description;
       this._conversation = conversation;
     }
-  
-    set name(value) {
+    
+      set name(value) {
       if (value.length < 4) {
         alert("Name is too short.");
         return;
@@ -110,22 +110,44 @@ class Room {
     get conversation() {
       return this._conversation;
     }
+    
   
     describe() {
-      return (
-        "You have met " +
-        this._name +
-        ", " +
-        this._name +
-        " is " +
-        this._description
-      );
+      let description = `You have met ${this._name}, ${this._name} is ${this._description}.`;
+      if (this._swordInInventory) {
+        description += " You are carrying a sword.";
+      }
+      return description;
     }
   
     talk() {
-      return this._name + " says '" + this._conversation + "'";
+      return `${this._name} says '${this._conversation}'`;
+    }
+  
+    performAction(action) {
+      if (action === "pickup" && currentRoom.items.includes("Sword")) {
+        currentRoom.items = currentRoom.items.filter(item => item !== "Sword");
+        this._inventory.push("Sword");
+        this._swordInInventory = true;
+        console.log("You picked up the sword.");
+        displayRoomInfo(currentRoom);
+      } else if (action === "attack" && currentRoom.character instanceof EnemyCharacter) {
+        if (this._swordInInventory) {
+          console.log("You defeated dracula with the sword you obtained and won the game.");
+          return;
+        } else {
+          console.log("You need the sword to defeat dracula, You were defeated. Game Over.");
+          return;
+        }
+      } else {
+        console.log("Perform other actions or handle movement.");
+      }
     }
   }
+  class EnemyCharacter extends Character {
+    constructor(name, description, conversation) {
+      super(name, description, conversation);
+    }}
   
   console.log("online");
   
@@ -136,7 +158,7 @@ class Room {
   const armory = new Room("Armory", "Rows of medieval weaponry, A faint metallic scent lingers in the air.");
   const library = new Room("Library","Rows of bookshelves filled with books of forbidden knowledge.");
   const diningHall = new Room("Dining Hall","A long table, covered in cobwebs. Moonlight filters in through the windows.");
-  const throneRoom = new Room("Throne Room","A massive throne and crimson carpet. Stained glass windows depict dark scenes from the castle's history.");
+  const throneRoom = new Room("Throne Room","A massive throne and crimson carpet. Dark and mysterious.");
 
 // Items in rooms
 armory.items = "Sword"
@@ -149,17 +171,21 @@ castleEntrance.items = "door"
   forest.linkRoom("east", lake);
   lake.linkRoom("west", forest);
   castleEntrance.linkRoom("north", grandHall);
-  castleEntrance.linkRoom("west", armory);
   castleEntrance.linkRoom("east", forest);
   grandHall.linkRoom("south", castleEntrance);
   grandHall.linkRoom("west", armory);
-  grandHall.linkRoom("west", library);
   grandHall.linkRoom("east", diningHall);
   grandHall.linkRoom("north", throneRoom);
-  armory.linkRoom("east", castleEntrance);
-  library.linkRoom("east", grandHall);
+  armory.linkRoom("east", grandHall);
+  library.linkRoom("west", diningHall);
   diningHall.linkRoom("west", grandHall);
+  diningHall.linkRoom("east", library);
   throneRoom.linkRoom("south", grandHall);
+
+  
+  const Dracula = new EnemyCharacter("Dracula", "The fearsome vampire lord", "Prepare to meet your doom!");
+
+  throneRoom.character = Dracula;
 
   const Villager = new Character("Villager", "A scared local", "Beware of the castle...");
   
@@ -184,15 +210,19 @@ castleEntrance.items = "door"
 
     if (room.name === "Forest") {textContent += "<p>You are East of a Castle</p>";
   }   
-    
-
+  
+  if (lastAction === "open") {
+    textContent += "<p>You opened the door.</p>";
+    lastAction = ""; // Reset the last action
+  }
     document.getElementById("textarea").innerHTML = textContent;
     document.getElementById("usertext").value = "";
     document.getElementById("usertext").focus();
   };
 
-  // make an array of empty items 
+  let lastAction = ""; 
 
+  // make an array of empty items 
   let usersCollectedItems = []
   
   const startgame = () => {
@@ -215,11 +245,17 @@ castleEntrance.items = "door"
             currentRoom = currentRoom.move(newCommand[1]);
             displayRoomInfo(currentRoom);
           }
+          if (currentRoom === throneRoom && usersCollectedItems.includes("Sword")) {
+            console.log("Congratulations! You defeated Dracula and won the game.");
+            alert("Congratulations! You defeated Dracula and won the game.");
+            return;
+          }
 
           else if (command === "pickup") {
             usersCollectedItems = [
               ...usersCollectedItems,
               ...currentRoom.items
+              
             ]
             currentRoom.items = [];
             usersCollectedItems = new Set(
@@ -227,6 +263,7 @@ castleEntrance.items = "door"
             );
             usersCollectedItems = Array.from(usersCollectedItems)
             console.log(usersCollectedItems);
+            alert("You picked up the sword.");
           }
 
           else if (command === "open") {
@@ -235,8 +272,9 @@ castleEntrance.items = "door"
               usersCollectedItems.push("door");
               currentRoom.items.splice(doorIndex, 1);
               console.log("You opened the door.");
+              alert("You opened the door.");
               if (currentRoom.name === "Castle Entrance") {
-                currentRoom = currentRoom.move("west");
+                currentRoom = currentRoom.move("north");
                 displayRoomInfo(currentRoom);
                 console.log("You moved to the Grand Hall.");
               }
