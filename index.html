@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Based Game</title>
     <style>
-        body {
+    body {
             font-family: 'Courier New', monospace;
             background-color: black;
             color: white;
@@ -32,16 +32,19 @@
 </head>
 <body>
     <div>
+        <div id="initialMessage">
+            <p>You are a vampire hunter and you find yourself in a dark and mysterious forest, what will happen next?</p>
+            <button id="startButton">Start Game</button>
+        </div>
 
-        <div id="gamearea">
+        <div id="gamearea" style="display: none;">
             <div id="details">
-            <div>
                 <p id="textarea"></p>
                 <input type="text" id="usertext" />
             </div>
         </div>
     </div>
-</div>
+
 
     <script src="gamestart.js"></script>
 </body>
