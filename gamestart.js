@@ -216,15 +216,11 @@ const displayRoomInfo = (room) => {
     textContent += "<p>You are West of the Forest</p>";
   } else if (room.name === "Grand Hall") {
     textContent += "<p>This is the main hall, a hallway to other rooms.</p>";
-  }
-  else if (room.name === "Dining Hall") {
+  } else if (room.name === "Dining Hall") {
     textContent += "<p>This is the Dining Hall, East of the Grand Hall.</p>";
-  }
-  else if (room.name === "Libary") {
+  } else if (room.name === "Libary") {
     textContent += "<p>This is the Dining Hall, East of the Dining Hall.</p>";
   }
-  
-  
 
   document.getElementById("textarea").innerHTML = textContent;
   document.getElementById("usertext").value = "";
@@ -265,10 +261,15 @@ const startgame = () => {
           currentRoom = currentRoom.move(newCommand[1]);
           displayRoomInfo(currentRoom);
         } else if (command === "pickup") {
-          if (currentRoom.name === "Armory" && currentRoom.items.includes("Sword")) {
+          if (
+            currentRoom.name === "Armory" &&
+            currentRoom.items.includes("Sword")
+          ) {
             if (!usersCollectedItems.includes("Sword")) {
               usersCollectedItems.push("Sword");
-              currentRoom.items = currentRoom.items.filter(item => item !== "Sword");
+              currentRoom.items = currentRoom.items.filter(
+                (item) => item !== "Sword"
+              );
               console.log("You picked up the sword.");
               alert("You picked up the sword.");
               lastAction = "pickup";
@@ -280,9 +281,7 @@ const startgame = () => {
             console.log("There is nothing to pickup here.");
             alert("There is nothing to pickup here.");
           }
-        }
-
-         else if (command === "open") {
+        } else if (command === "open") {
           if (currentRoom.items.includes("door")) {
             usersCollectedItems = [
               ...usersCollectedItems,
@@ -305,35 +304,36 @@ const startgame = () => {
             console.log("There is no door to open.");
             alert("There is no door to open.");
           }
-        
-      } else if (command === "attack") {
-        if (currentRoom.name === "Throne Room") {
-          const enemy = currentRoom.character;
-          if (enemy && enemy instanceof EnemyCharacter) {
-            if (usersCollectedItems.includes("Sword")) {
-              console.log("You won the game!");
-              alert("You defeated Dracula and won the game!");
+        } else if (command === "attack") {
+          if (currentRoom.name === "Throne Room") {
+            const enemy = currentRoom.character;
+            if (enemy && enemy instanceof EnemyCharacter) {
+              if (usersCollectedItems.includes("Sword")) {
+                console.log("You won the game!");
+                alert("You defeated Dracula and won the game!");
+              } else {
+                console.log("You lost the game!");
+                alert(
+                  "You needthe sword to defeat Dracula. You were defeated. Game Over."
+                );
+              }
             } else {
-              console.log("You lost the game!");
-              alert("You needthe sword to defeat Dracula. You were defeated. Game Over.");
+              console.log("There is no enemy to attack in this room.");
+              alert("There is no enemy to attack in this room.");
             }
           } else {
-            console.log("There is no enemy to attack in this room.");
-            alert("There is no enemy to attack in this room.");
+            console.log("You can only attack in the Throne Room.");
+            alert("You can only attack in the Throne Room.");
           }
+          displayRoomInfo(currentRoom);
         } else {
-          console.log("You can only attack in the Throne Room.");
-          alert("You can only attack in the Throne Room.");
+          document.getElementById("usertext").value = "";
+          alert("That is not a valid command.");
+          return;
         }
-        displayRoomInfo(currentRoom);
-      } else {
-        document.getElementById("usertext").value = "";
-        alert("That is not a valid command.");
-        return;
       }
     }
-  }
-});
+  });
 };
 
 console.log("online");
